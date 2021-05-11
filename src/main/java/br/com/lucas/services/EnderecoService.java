@@ -4,24 +4,28 @@ import br.com.lucas.entities.Endereco;
 import br.com.lucas.feign.ViaCepFeign;
 import br.com.lucas.feign.dto.CepDTO;
 import br.com.lucas.repositories.EnderecoRepository;
+import br.com.lucas.repositories.UsuarioRepository;
 import br.com.lucas.repositories.entities.EnderecoEntity;
 import br.com.lucas.repositories.entities.UsuarioEntity;
 import br.com.lucas.services.builder.EnderecoBuilder;
+import br.com.lucas.services.exception.UsuarioNaoEncontradoException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class EnderecoService {
 
     private EnderecoRepository enderecoRepository;
+    private UsuarioRepository usuarioRepository;
     private ModelMapper mapper;
     private ViaCepFeign viaCepFeign;
 
-    public EnderecoService(EnderecoRepository enderecoRepository, ModelMapper mapper, ViaCepFeign viaCepFeign) {
+    public EnderecoService(EnderecoRepository enderecoRepository, UsuarioRepository usuarioRepository, ModelMapper mapper, ViaCepFeign viaCepFeign) {
         this.enderecoRepository = enderecoRepository;
+        this.usuarioRepository = usuarioRepository;
         this.mapper = mapper;
         this.viaCepFeign = viaCepFeign;
     }
@@ -30,14 +34,16 @@ public class EnderecoService {
 
         endereco = verificarEndereco(endereco);
 
+        var enderecoEntity = mapper.map(endereco, EnderecoEntity.class);
 
-        UsuarioEntity usuarioEntity = new UsuarioEntity();
-        usuarioEntity.setId(Long.valueOf(endereco.getIdUsuario()));
+        var usuarioEntity = usuarioRepository.findById(Long.valueOf(endereco.getIdUsuario()));
 
-        EnderecoEntity enderecoEntity = mapper.map(endereco, EnderecoEntity.class);
+        if(!usuarioEntity.isPresent()){
+            throw new UsuarioNaoEncontradoException("O usuário ao qual o endereço pertence não foi encontrado.");
+        }
 
         enderecoEntity.setId(UUID.randomUUID().toString());
-        enderecoEntity.setUsuarioEntity(usuarioEntity);
+        enderecoEntity.setUsuarioEntity(usuarioEntity.get());
         EnderecoEntity enderecoRetornado = enderecoRepository.save(enderecoEntity);
         return mapper.map(enderecoRetornado, Endereco.class);
     }
