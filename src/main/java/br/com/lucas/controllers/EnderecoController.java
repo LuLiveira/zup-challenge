@@ -5,6 +5,7 @@ import br.com.lucas.controllers.dto.EnderecoDTO;
 import br.com.lucas.entities.Endereco;
 import br.com.lucas.services.EnderecoService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,6 @@ public class EnderecoController {
 
         EnderecoDTO enderecoDTO = mapper.map(enderecoRetornado, EnderecoDTO.class);
 
-        return ResponseEntity.ok(enderecoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(enderecoDTO);
     }
 }

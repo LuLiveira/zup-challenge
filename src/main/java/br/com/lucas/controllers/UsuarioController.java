@@ -6,7 +6,9 @@ import br.com.lucas.entities.Usuario;
 import br.com.lucas.repositories.entities.UsuarioEntity;
 import br.com.lucas.services.UsuarioService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,7 +35,7 @@ public class UsuarioController {
 
         UsuarioDTO usuarioDTO = mapper.map(usuarioRetornado, UsuarioDTO.class);
 
-        return ResponseEntity.ok(usuarioDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioDTO);
     }
 
     @GetMapping("/{id}")
